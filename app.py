@@ -21,6 +21,7 @@ actie = st.sidebar.selectbox(
     "Kies een module of actie:",
     [
         "Handmatig commando", 
+        "Handleiding / Menu",
         "Grand Tour Demo", 
         "Paracetamol Molmassa (C8H9NO2)", 
         "Taylor-reeks van sin(x)", 
@@ -33,7 +34,9 @@ actie = st.sidebar.selectbox(
 
 # Bepaal de standaard invoer op basis van het menu
 default_input = ""
-if actie == "Grand Tour Demo":
+if actie == "Handleiding / Menu":
+    default_input = "help"
+elif actie == "Grand Tour Demo":
     default_input = "grand_tour()"
 elif actie == "Paracetamol Molmassa (C8H9NO2)":
     default_input = "molmassa('C8H9NO2')"
@@ -48,7 +51,7 @@ elif actie == "pH & Zuurtegraad":
 elif actie == "Planeet Info (Jupiter)":
     default_input = "planeet_info('jupiter')"
 
-gebruiker_input = st.text_input("Typ je commando of som:", value=default_input)
+gebruiker_input = st.text_input("Typ je commando of som (of typ 'help'):", value=default_input)
 
 # Functie om terminal kleurcodes (ANSI) weg te filteren voor het web
 def strip_ansi(text):
@@ -59,32 +62,36 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
     if gebruiker_input:
         with st.spinner("Boordcomputer voert berekening uit..."):
             try:
-                # Namespace voor de app
-                ns = {
-                    "sp": sp, "c": 3e8, "g": 9.81, "G": 6.674e-11, "M": 1.989e30,
-                    "sin": sp.sin, "cos": sp.cos, "tan": sp.tan, "exp": sp.exp, "log": sp.log,
-                    "diff": sp.diff, "integrate": sp.integrate, "solve": sp.solve,
-                    "dsolve": sp.dsolve, "Eq": sp.Eq, "sqrt": sp.sqrt, "pi": sp.pi,
-                    "Matrix": sp.Matrix, "factorial": sp.factorial, "zeta": sp.zeta,
-                    "molmassa": kids_rekenen.bereken_molmassa,
-                    "taylor": kids_rekenen.bereken_taylor,
-                    "laplace": kids_rekenen.laplace,
-                    "ohm": kids_rekenen.bereken_ohm,
-                    "ph": kids_rekenen.bereken_ph,
-                    "planeet_info": kids_rekenen.planeet_info,
-                    "grand_tour": kids_rekenen.grand_tour,
-                    "num_integrate": kids_rekenen.num_integrate,
-                }
-                
-                geparst = kids_rekenen.slimme_parser(gebruiker_input)
-                
                 # Vang alle print-statements en logs op van de achtergrond
                 old_stdout = sys.stdout
                 new_stdout = io.StringIO()
                 sys.stdout = new_stdout
                 
                 try:
-                    resultaat = eval(geparst, {"__builtins__": None, **ns})
+                    # Als de gebruiker help typt, roepen we direct de handleiding aan
+                    if gebruiker_input.lower().strip() in ['help', 'menu', 'handleiding', 'h']:
+                        kids_rekenen.toon_handleiding()
+                        resultaat = None
+                    else:
+                        # Namespace voor de app gekoppeld aan de correcte functienamen in kids_rekenen
+                        ns = {
+                            "sp": sp, "c": 3e8, "g": 9.81, "G": 6.674e-11, "M": 1.989e30,
+                            "sin": sp.sin, "cos": sp.cos, "tan": sp.tan, "exp": sp.exp, "log": sp.log,
+                            "diff": sp.diff, "integrate": sp.integrate, "solve": sp.solve,
+                            "dsolve": sp.dsolve, "Eq": sp.Eq, "sqrt": sp.sqrt, "pi": sp.pi,
+                            "Matrix": sp.Matrix, "factorial": sp.factorial, "zeta": sp.zeta,
+                            "molmassa": kids_rekenen.bereken_molmassa,
+                            "taylor": kids_rekenen.bereken_taylor,
+                            "laplace": kids_rekenen.bereken_laplace, # Aangepast naar de juiste naam
+                            "ohm": kids_rekenen.bereken_ohm,
+                            "ph": kids_rekenen.bereken_ph,
+                            "planeet_info": kids_rekenen.planeet_info,
+                            "grand_tour": kids_rekenen.grand_tour,
+                            "num_integrate": kids_rekenen.num_integrate,
+                        }
+                        
+                        geparst = kids_rekenen.slimme_parser(gebruiker_input)
+                        resultaat = eval(geparst, {"__builtins__": None, **ns})
                 finally:
                     sys.stdout = old_stdout
                     
