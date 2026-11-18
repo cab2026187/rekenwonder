@@ -127,14 +127,13 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
     if not gebruiker_input.strip():
         st.warning("Voer eerst een commando of som in!")
     else:
-        # Waterdichte intercept voor help / menu commando's
         gekuiste_input = gebruiker_input.strip().lower()
         if gekuiste_input in ["help", "help()", "menu", "toon_help", "handleiding"]:
             toon_help()
         else:
             with st.spinner("Boordcomputer voert berekening uit..."):
                 try:
-                    # Robuuste Namespace met veilige fallbacks als een functie ontbreekt in kids_rekenen
+                    # Robuuste Namespace met veilige fallbacks gekoppeld aan de juiste functienamen in kids_rekenen
                     def veilige_functie(func_naam):
                         f = getattr(kids_rekenen, func_naam, None)
                         if f is None:
@@ -195,12 +194,11 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                         "live_loterij": veilige_functie("haal_live_loterij_data"),
                         "laad_loterij": veilige_functie("laad_en_analyseer_csv"),
                         
-                        # Systeem
+                        # Systeem & Numeriek (gekoppeld aan los_op_numeriek)
                         "grand_tour": veilige_functie("grand_tour"),
-                        "numeriek": veilige_functie("numeriek"),
+                        "numeriek": veilige_functie("los_op_numeriek"),
                     }
                     
-                    # Veilige parsing met fallback als de parser faalt
                     try:
                         geparst = kids_rekenen.slimme_parser(gebruiker_input)
                     except Exception:
@@ -221,12 +219,10 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                     
                     st.success("Missie geslaagd! 🚀")
                     
-                    # Toon de opgevangen terminal-output netjes op het scherm
                     if clean_output.strip():
                         st.subheader("Boordcomputer Log:")
                         st.text(clean_output)
                     
-                    # Als er een direct resultaat is zonder prints, toon dat ook
                     if resultaat is not None and not clean_output.strip():
                         st.subheader("Resultaat:")
                         if isinstance(resultaat, (sp.Expr, sp.Matrix)):
