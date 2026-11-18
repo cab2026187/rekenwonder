@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # Importeer je bestaande functies uit rekenwonder.py 
 # (Zorg dat rekenwonder.py in dezelfde map staat, of kopieer je logica hierin)
-from rekenwonder import ns, slimme_parser, schrijf_log
+from kids_rekenen import ns, slimme_parser, schrijf_log
 
 st.set_page_config(
     page_title="Mission Control Mobile",
