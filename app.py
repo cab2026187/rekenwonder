@@ -4,6 +4,8 @@ import numpy as np
 import io
 import sys
 import re
+import os
+import datetime
 import kids_rekenen
 
 st.set_page_config(
@@ -15,7 +17,27 @@ st.set_page_config(
 st.title("🚀 Mission Control // Mobile")
 st.markdown("*De ultieme mobiele science engine.*")
 
-# Sidebar met snelle keuzes
+# --- SESSIE INITIALISATIE VOOR GESCHIEDENIS ---
+if "geschiedenis" not in st.session_state:
+    st.session_state.geschiedenis = []
+
+# Functie om acties weg te schrijven naar het logboek en sessie
+def log_historie(commando, status="Succes"):
+    tijdstempel = datetime.datetime.now().strftime("%H:%M:%S")
+    item = f"[{tijdstempel}] {commando} — {status}"
+    st.session_state.geschiedenis.append(item)
+    
+    # Probeer ook weg te schrijven naar de lokale harde schijf
+    try:
+        docs_map = os.path.join(os.path.expanduser('~'), 'Documents')
+        os.makedirs(docs_map, exist_ok=True)
+        pad = os.path.join(docs_map, 'missie_logboek.txt')
+        with open(pad, 'a', encoding='utf-8') as f:
+            f.write(item + '\n')
+    except Exception:
+        pass
+
+# Sidebar met snelle keuzes (inclusief logboek optie)
 st.sidebar.header("Command Center")
 actie = st.sidebar.selectbox(
     "Kies een module of actie:",
@@ -28,7 +50,8 @@ actie = st.sidebar.selectbox(
         "Wet van Ohm (U = I * R)", 
         "pH & Zuurtegraad",
         "Planeet Info (Jupiter)",
-        "Help / Handleiding tonen"
+        "Help / Handleiding tonen",
+        "📜 Bekijk Eerdere Sommen (Logboek)"
     ]
 )
 
@@ -50,8 +73,29 @@ elif actie == "Planeet Info (Jupiter)":
     default_input = "planeet_info('jupiter')"
 elif actie == "Help / Handleiding tonen":
     default_input = "help"
+elif actie == "📜 Bekijk Eerdere Sommen (Logboek)":
+    default_input = "logboek"
 
-gebruiker_input = st.text_input("Typ je commando of som:", value=default_input)
+# Als de gebruiker kiest voor het logboek via de sidebar
+if actie == "📜 Bekijk Eerdere Sommen (Logboek)":
+    st.subheader("📜 Historisch Missie-Logboek (Eerdere Sommen)")
+    st.markdown("Hieronder staat het overzicht van al je uitgevoerde berekeningen in deze sessie:")
+    
+    if st.session_state.geschiedenis:
+        for idx, hist_item in enumerate(reversed(st.session_state.geschiedenis), 1):
+            st.text(f"{idx}. {hist_item}")
+        
+        if st.button("🗑️ Logboek Leegmaken"):
+            st.session_state.geschiedenis = []
+            st.success("Logboek succesvol geleegd!")
+            st.rerun()
+    else:
+        st.info("Nog geen berekeningen uitgevoerd in deze sessie. Voer een som in om te starten!")
+    
+    # Stop verdere uitvoering van het formulier als het logboek open staat
+    st.stop()
+
+gebruiker_input = st.text_input("Typ je commando of som:", value=default_input if default_input != "logboek" else "")
 
 # Functie om terminal kleurcodes (ANSI) weg te filteren voor het web
 def strip_ansi(text):
@@ -130,10 +174,11 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
         gekuiste_input = gebruiker_input.strip().lower()
         if gekuiste_input in ["help", "help()", "menu", "toon_help", "handleiding"]:
             toon_help()
+            log_historie("help", "Handleiding opgevraagd")
         else:
             with st.spinner("Boordcomputer voert berekening uit..."):
                 try:
-                    # Robuuste Namespace met veilige fallbacks gekoppeld aan de juiste functienamen in kids_rekenen
+                    # Robuuste Namespace met veilige fallbacks
                     def veilige_functie(func_naam):
                         f = getattr(kids_rekenen, func_naam, None)
                         if f is None:
@@ -194,7 +239,7 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                         "live_loterij": veilige_functie("haal_live_loterij_data"),
                         "laad_loterij": veilige_functie("laad_en_analyseer_csv"),
                         
-                        # Systeem & Numeriek (gekoppeld aan los_op_numeriek)
+                        # Systeem & Numeriek
                         "grand_tour": veilige_functie("grand_tour"),
                         "numeriek": veilige_functie("los_op_numeriek"),
                     }
@@ -202,9 +247,9 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                     try:
                         geparst = kids_rekenen.slimme_parser(gebruiker_input)
                     except Exception:
-                        geparst = gebruiker_input  # Fallback naar originele invoer
+                        geparst = gebruiker_input
                     
-                    # Vang alle print-statements en logs op van de achtergrond
+                    # Vang prints op
                     old_stdout = sys.stdout
                     new_stdout = io.StringIO()
                     sys.stdout = new_stdout
@@ -218,6 +263,7 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                     clean_output = strip_ansi(captured_output)
                     
                     st.success("Missie geslaagd! 🚀")
+                    log_historie(gebruiker_input, "Succes")
                     
                     if clean_output.strip():
                         st.subheader("Boordcomputer Log:")
@@ -232,3 +278,4 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                             
                 except Exception as e:
                     st.error(f"Fout tijdens missie: {e}")
+                    log_historie(gebruiker_input, f"Fout: {e}")
