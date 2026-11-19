@@ -22,9 +22,12 @@ st.markdown("*De ultieme mobiele science engine.*")
 if "geschiedenis" not in st.session_state:
     st.session_state.geschiedenis = []
 
-def log_historie(commando, status="Succes"):
+def log_historie(commando, uitkomst="Succes"):
     tijdstempel = datetime.datetime.now().strftime("%H:%M:%S")
-    item = f"[{tijdstempel}] {commando} — {status}"
+    uitkomst_str = " ".join(str(uitkomst).split())
+    if len(uitkomst_str) > 140:
+        uitkomst_str = uitkomst_str[:137] + "..."
+    item = f"[{tijdstempel}] {commando}  ➔  {uitkomst_str}"
     st.session_state.geschiedenis.append(item)
     try:
         docs_map = os.path.join(os.path.expanduser("~"), "Documents")
@@ -113,7 +116,7 @@ elif actie == "📜 Bekijk Eerdere Sommen (Logboek)":
 
 if actie == "📜 Bekijk Eerdere Sommen (Logboek)":
     st.subheader("📜 Historisch Missie-Logboek (Eerdere Sommen)")
-    st.markdown("Hieronder staat het overzicht van al je uitgevoerde berekeningen in deze sessie:")
+    st.markdown("Hieronder staat het overzicht van al je uitgevoerde berekeningen en hun uitkomsten in deze sessie:")
 
     if st.session_state.geschiedenis:
         for idx, hist_item in enumerate(reversed(st.session_state.geschiedenis), 1):
@@ -212,6 +215,18 @@ def veilige_functie(func_naam):
         return ontbrekend
     return f
 
+def haal_antwoord_uit_log(log_tekst):
+    for lijn in reversed(log_tekst.splitlines()):
+        stripped = lijn.strip()
+        if not stripped:
+            continue
+        if ":" in stripped:
+            _, rechts = stripped.split(":", 1)
+            rechts = rechts.strip()
+            if rechts:
+                return rechts
+    return None
+
 if st.button("Lanceer Berekening 🚀", type="primary"):
     if not gebruiker_input.strip():
         st.warning("Voer eerst een commando of som in!")
@@ -219,7 +234,7 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
         gekuiste_input = gebruiker_input.strip().lower()
         if gekuiste_input in ["help", "help()", "menu", "menu()", "toon_help", "toon_help()", "handleiding", "toon_handleiding", "toon_handleiding()"]:
             toon_help()
-            log_historie(gebruiker_input.strip(), "Handleiding opgevraagd")
+            log_historie(gebruiker_input.strip(), "Handleiding getoond")
         else:
             with st.spinner("Boordcomputer voert berekening uit..."):
                 try:
@@ -301,11 +316,40 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
 
                     captured_output = new_stdout.getvalue()
                     clean_output = strip_ansi(captured_output)
+                    had_figuur = bool(plt.get_fignums())
+
+                    if resultaat is not None:
+                        log_uitkomst = str(resultaat)
+                    else:
+                        log_uitkomst = (
+                            haal_antwoord_uit_log(clean_output)
+                            or ("Grafiek weergegeven" if had_figuur else None)
+                            or (clean_output.strip().splitlines()[-1].strip() if clean_output.strip() else "Geen uitvoer")
+                        )
 
                     st.success("Missie geslaagd! 🚀")
-                    log_historie(gebruiker_input, "Succes")
+                    log_historie(gebruiker_input.strip(), log_uitkomst)
 
-                    if plt.get_fignums():
+                    # Duidelijke weergave van Som / Opgave en Antwoord
+                    st.markdown("---")
+                    st.markdown(f"**Som / Opgave:** `{gebruiker_input.strip()}`")
+                    if resultaat is not None:
+                        if isinstance(resultaat, (sp.Expr, sp.Matrix)):
+                            st.markdown("**Antwoord:**")
+                            st.latex(sp.latex(resultaat))
+                        else:
+                            st.markdown(f"**Antwoord:** `{resultaat}`")
+                    else:
+                        log_antwoord = haal_antwoord_uit_log(clean_output)
+                        if log_antwoord:
+                            st.markdown(f"**Antwoord:** `{log_antwoord}`")
+                        elif had_figuur:
+                            st.markdown("**Antwoord:** *Zie grafiek hieronder*")
+                        elif clean_output.strip():
+                            st.markdown("**Antwoord:** *Zie boordcomputer-uitvoer hieronder*")
+                    st.markdown("---")
+
+                    if had_figuur:
                         st.subheader("Grafiek:")
                         st.pyplot(plt.gcf())
                         plt.close("all")
@@ -323,4 +367,4 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
 
                 except Exception as e:
                     st.error(f"Fout tijdens missie: {e}")
-                    log_historie(gebruiker_input, f"Fout: {e}")
+                    log_historie(gebruiker_input.strip(), f"Fout: {e}")
