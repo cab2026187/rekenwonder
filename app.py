@@ -35,6 +35,23 @@ def log_historie(commando, status="Succes"):
     except Exception:
         pass
 
+bekende_cmds = [
+    "molmassa", "balanceer", "ph", "verdun", "gaswet", "kook",
+    "taylor", "laplace", "num_integrate", "nint", "gradient",
+    "vector_gradient", "matrix", "epische_som", "latex",
+    "debroglie", "debroglie_relativistisch", "debroglie_thermisch",
+    "rydberg", "warmte", "kwantum", "resonantie", "vanderpol",
+    "ode_plot", "ohm", "relativiteit", "christoffel", "zwaartekracht",
+    "planeet_info", "baan", "wizard", "impact", "worp", "loterij",
+    "loterij_analyse", "echte_loterij", "live_loterij", "laad_loterij",
+    "grand_tour", "numeriek"
+]
+
+def normaliseer_commando(tekst):
+    for cmd in bekende_cmds:
+        tekst = re.sub(rf"\b{re.escape(cmd)}\b(?=\s*\()", cmd, tekst, flags=re.IGNORECASE)
+    return tekst
+
 # Sidebar met snelle keuzes (inclusief logboek optie)
 st.sidebar.header("Command Center")
 actie = st.sidebar.selectbox(
@@ -102,56 +119,56 @@ def toon_help():
     *Overzicht van alle beschikbare modules en commando's:*
 
     #### 📐 1. WISKUNDE & CALCULUS & STAPPENPLAN
-    * **Afgeleide** : `diff(x^3 * sin(x), x)`
-    * **Integraal** : `integrate(x^2 * exp(x), x)`
-    * **Taylor-reeks** : `taylor(sin(x))`
-    * **Laplace** : `laplace(exp(-t))`
-    * **Numeriek int** : `num_integrate('exp(-x**2)', 0, 5)` / `nint(...)`
-    * **Gradient** : `gradient(x^2 + y^2, 'x', 'y')` / `vector_gradient(...)`
-    * **Matrix analyse** : `matrix([[2, 1], [1, 3]])`
-    * **Epische som** : `epische_som()`
-    * **LaTeX export** : `latex(diff(x^2 * sin(x), x))`
+- **Afgeleide** : `diff(x^3 * sin(x), x)`
+- **Integraal** : `integrate(x^2 * exp(x), x)`
+- **Taylor-reeks** : `taylor(sin(x))`
+- **Laplace** : `laplace(exp(-t))`
+- **Numeriek int** : `num_integrate('exp(-x**2)', 0, 5)` / `nint(...)`
+- **Gradient** : `gradient(x^2 + y^2, 'x', 'y')` / `vector_gradient(...)`
+- **Matrix analyse** : `matrix([[2, 1], [1, 3]])`
+- **Epische som** : `epische_som()`
+- **LaTeX export** : `latex(diff(x^2 * sin(x), x))`
 
     #### 🔢 2. ALGEBRA & VERGELIJKINGEN
-    * **Vergelijking** : `solve(x^2 - 8*x + 15, x)`
-    * **Uitwerken/Haakjes** : `sp.expand((x + 3)^4)`
+- **Vergelijking** : `solve(x^2 - 8*x + 15, x)`
+- **Uitwerken/Haakjes** : `sp.expand((x + 3)^4)`
 
     #### 🧪 3. SCHEIKUNDE & LAB
-    * **Molaire massa** : `molmassa("C8H9NO2")`
-    * **Balanceren** : `balanceer("H2 + O2 -> H2O")`
-    * **Zuurgraad** : `ph(0.01)`
-    * **Verdunningen** : `verdun(C1, 50, 0.1, 250)`
-    * **Algemene gaswet** : `gaswet(101325, "V", 1, 273.15, "V")`
-    * **Lab opbrengst** : `kook(24.5, 25.0)`
+- **Molaire massa** : `molmassa("C8H9NO2")`
+- **Balanceren** : `balanceer("H2 + O2 -> H2O")`
+- **Zuurgraad** : `ph(0.01)`
+- **Verdunningen** : `verdun(C1, 50, 0.1, 250)`
+- **Algemene gaswet** : `gaswet(101325, "V", 1, 273.15, "V")`
+- **Lab opbrengst** : `kook(24.5, 25.0)`
 
     #### ⚛️ 4. NATUURKUNDE & KWANTUM
-    * **De Broglie** : `debroglie(9.11e-31, 1e6)`, `debroglie_relativistisch(1)`, `debroglie_thermisch(293.15, 0.25)`
-    * **Rydberg** : `rydberg(1, 3)`
-    * **Warmte** : `warmte("water", 1, 20, 100)`
-    * **Kwantum energie** : `kwantum(0)`
-    * **Resonantie** : `resonantie(1.0)`
-    * **Van der Pol** : `vanderpol()`
-    * **ODE plot** : `ode_plot("y'' + 3y' + 2y = sin(t)")`
-    * **Wet van Ohm** : `ohm(u=12, r=4)`
+- **De Broglie** : `debroglie(9.11e-31, 1e6)`, `debroglie_relativistisch(1)`, `debroglie_thermisch(293.15, 0.25)`
+- **Rydberg** : `rydberg(1, 3)`
+- **Warmte** : `warmte("water", 1, 20, 100)`
+- **Kwantum energie** : `kwantum(0)`
+- **Resonantie** : `resonantie(1.0)`
+- **Van der Pol** : `vanderpol()`
+- **ODE plot** : `ode_plot("y'' + 3y' + 2y = sin(t)")`
+- **Wet van Ohm** : `ohm(u=12, r=4)`
 
     #### 🌌 5. ASTROFYSICA & RELATIVITEIT
-    * **Relativiteit** : `relativiteit(0.8, 3600)`
-    * **Christoffel** : `christoffel(...)`
-    * **Zwaartekracht** : `zwaartekracht(5.97e24, 7.35e22, 3.84e8)`
-    * **Planeet info** : `planeet_info("jupiter")`
-    * **Baansimulatie** : `baan()`
-    * **Impact simulatie** : `impact(1.0)`
-    * **Schuine worp** : `worp(25, 45)`
+- **Relativiteit** : `relativiteit(0.8, 3600)`
+- **Christoffel** : `christoffel(...)`
+- **Zwaartekracht** : `zwaartekracht(5.97e24, 7.35e22, 3.84e8)`
+- **Planeet info** : `planeet_info("jupiter")`
+- **Baansimulatie** : `baan()`
+- **Impact simulatie** : `impact(1.0)`
+- **Schuine worp** : `worp(25, 45)`
 
     #### 🎲 6. LOTERIJ & DATA-ANALYSES
-    * **Loterij simulatie** : `loterij(6, 45)`
-    * **Historie analyse** : `loterij_analyse([[1, 2, 3, 4, 5, 6]])`
-    * **Echte data** : `echte_loterij()` / `laad_loterij("loterij_data.csv")`
-    * **Live data** : `live_loterij()`
+- **Loterij simulatie** : `loterij(6, 45)`
+- **Historie analyse** : `loterij_analyse([[1, 2, 3, 4, 5, 6]])`
+- **Echte data** : `echte_loterij()` / `laad_loterij("loterij_data.csv")`
+- **Live data** : `live_loterij()`
 
     #### 🚀 7. SYSTEEM & TOOLS
-    * **Grand Tour** : `grand_tour()`
-    * **Niet-lineaire ODE** : `numeriek()`
+- **Grand Tour** : `grand_tour()`
+- **Niet-lineaire ODE** : `numeriek()`
 
     *Typ 'menu' of 'help' in het invoerveld om dit overzicht op te vragen.*
     """)
@@ -161,7 +178,8 @@ def toon_handleiding():
 
 class AppSmartNamespace(dict):
     def __missing__(self, key):
-        sym = kids_rekenen.SmartSymbol(key)
+        smart_cls = getattr(kids_rekenen, "SmartSymbol", None)
+        sym = smart_cls(key) if callable(smart_cls) else sp.Symbol(key)
         self[key] = sym
         return sym
 
@@ -178,9 +196,9 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
         st.warning("Voer eerst een commando of som in!")
     else:
         gekuiste_input = gebruiker_input.strip().lower()
-        if gekuiste_input in ["help", "help()", "menu", "toon_help", "handleiding"]:
+        if gekuiste_input in ["help", "help()", "menu", "menu()", "toon_help", "toon_help()", "handleiding", "toon_handleiding", "toon_handleiding()"]:
             toon_help()
-            log_historie("help", "Handleiding opgevraagd")
+            log_historie(gebruiker_input.strip(), "Handleiding opgevraagd")
         else:
             with st.spinner("Boordcomputer voert berekening uit..."):
                 try:
@@ -244,10 +262,11 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                         "numeriek": veilige_functie("los_op_numeriek"),
                     })
 
+                    genormaliseerd = normaliseer_commando(gebruiker_input)
                     try:
-                        geparst = kids_rekenen.slimme_parser(gebruiker_input)
+                        geparst = kids_rekenen.slimme_parser(genormaliseerd)
                     except Exception:
-                        geparst = gebruiker_input
+                        geparst = genormaliseerd
 
                     plt.close("all")
                     old_stdout = sys.stdout
