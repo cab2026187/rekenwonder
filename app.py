@@ -52,12 +52,19 @@ def normaliseer_commando(tekst):
         tekst = re.sub(rf"\b{re.escape(cmd)}\b(?=\s*\()", cmd, tekst, flags=re.IGNORECASE)
     return tekst
 
-# Sidebar met snelle keuzes (inclusief logboek optie)
+# Sidebar met snelle keuzes, zware demo's en logboek optie
 st.sidebar.header("Command Center")
 actie = st.sidebar.selectbox(
     "Kies een module of actie:",
     [
         "Handmatig commando",
+        "🔥 Epische Som (Integraal + Zeta(4))",
+        "🌀 Niet-Lineaire ODE Simulatie",
+        "⚡ Relativistische De Broglie (10 MeV)",
+        "📐 Matrix Analyse (3x3 Eigenwaarden & Inverse)",
+        "📉 Laplace Transformatie (t^3 * exp(-2*t))",
+        "🎯 Schuine Worp (v0=65 m/s, 52°)",
+        "🧪 Molaire Massa & Valentie (C12H16N2)",
         "Grand Tour Demo",
         "Paracetamol Molmassa (C8H9NO2)",
         "Taylor-reeks van sin(x)",
@@ -71,7 +78,21 @@ actie = st.sidebar.selectbox(
 )
 
 default_input = ""
-if actie == "Grand Tour Demo":
+if actie == "🔥 Epische Som (Integraal + Zeta(4))":
+    default_input = "epische_som()"
+elif actie == "🌀 Niet-Lineaire ODE Simulatie":
+    default_input = "numeriek()"
+elif actie == "⚡ Relativistische De Broglie (10 MeV)":
+    default_input = "debroglie_relativistisch(10)"
+elif actie == "📐 Matrix Analyse (3x3 Eigenwaarden & Inverse)":
+    default_input = "matrix([[4, 1, -2], [1, 3, 0], [-2, 0, 5]])"
+elif actie == "📉 Laplace Transformatie (t^3 * exp(-2*t))":
+    default_input = "laplace(t^3 * exp(-2*t))"
+elif actie == "🎯 Schuine Worp (v0=65 m/s, 52°)":
+    default_input = "worp(65, 52)"
+elif actie == "🧪 Molaire Massa & Valentie (C12H16N2)":
+    default_input = "molmassa('C12H16N2')"
+elif actie == "Grand Tour Demo":
     default_input = "grand_tour()"
 elif actie == "Paracetamol Molmassa (C8H9NO2)":
     default_input = "molmassa('C8H9NO2')"
