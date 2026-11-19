@@ -21,13 +21,10 @@ st.markdown("*De ultieme mobiele science engine.*")
 if "geschiedenis" not in st.session_state:
     st.session_state.geschiedenis = []
 
-# Functie om acties weg te schrijven naar het logboek en sessie
 def log_historie(commando, status="Succes"):
     tijdstempel = datetime.datetime.now().strftime("%H:%M:%S")
     item = f"[{tijdstempel}] {commando} — {status}"
     st.session_state.geschiedenis.append(item)
-    
-    # Probeer ook weg te schrijven naar de lokale harde schijf
     try:
         docs_map = os.path.join(os.path.expanduser('~'), 'Documents')
         os.makedirs(docs_map, exist_ok=True)
@@ -37,7 +34,7 @@ def log_historie(commando, status="Succes"):
     except Exception:
         pass
 
-# Sidebar met snelle keuzes (inclusief logboek optie)
+# Sidebar met snelle keuzes
 st.sidebar.header("Command Center")
 actie = st.sidebar.selectbox(
     "Kies een module of actie:",
@@ -55,7 +52,7 @@ actie = st.sidebar.selectbox(
     ]
 )
 
-# Bepaal de standaard invoer op basis van het menu
+# Bepaal standaard invoer
 default_input = ""
 if actie == "Grand Tour Demo":
     default_input = "grand_tour()"
@@ -76,28 +73,23 @@ elif actie == "Help / Handleiding tonen":
 elif actie == "📜 Bekijk Eerdere Sommen (Logboek)":
     default_input = "logboek"
 
-# Als de gebruiker kiest voor het logboek via de sidebar
+# Logboek scherm weergave in Streamlit
 if actie == "📜 Bekijk Eerdere Sommen (Logboek)":
     st.subheader("📜 Historisch Missie-Logboek (Eerdere Sommen)")
-    st.markdown("Hieronder staat het overzicht van al je uitgevoerde berekeningen in deze sessie:")
-    
+    st.markdown("Overzicht van je uitgevoerde berekeningen:")
     if st.session_state.geschiedenis:
         for idx, hist_item in enumerate(reversed(st.session_state.geschiedenis), 1):
             st.text(f"{idx}. {hist_item}")
-        
         if st.button("🗑️ Logboek Leegmaken"):
             st.session_state.geschiedenis = []
-            st.success("Logboek succesvol geleegd!")
+            st.success("Logboek geleegd!")
             st.rerun()
     else:
-        st.info("Nog geen berekeningen uitgevoerd in deze sessie. Voer een som in om te starten!")
-    
-    # Stop verdere uitvoering van het formulier als het logboek open staat
+        st.info("Nog geen berekeningen in deze sessie.")
     st.stop()
 
 gebruiker_input = st.text_input("Typ je commando of som:", value=default_input if default_input != "logboek" else "")
 
-# Functie om terminal kleurcodes (ANSI) weg te filteren voor het web
 def strip_ansi(text):
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     return ansi_escape.sub('', text)
@@ -107,65 +99,25 @@ def toon_help():
     ### 🚀 MISSION CONTROL // ULTIMATE SCIENCE ENGINE (STAPPENPLAN ACTIEF)
     *Overzicht van alle beschikbare modules en commando's:*
 
-    #### 📐 1. WISKUNDE & CALCULUS & STAPPENPLAN
-    * **Afgeleide** : `diff(x^3 * sin(x), x)`
-    * **Integraal** : `integrate(x^2 * exp(x), x)`
-    * **Stap-voor-stap** : `stappen(x^2 * sin(x))`
-    * **Grafiek plotter** : `plot(x^3 - 4*x, x)`
-    * **LaTeX export** : `latex(diff(x^2 * sin(x), x))`
-    * **Taylor-reeks** : `taylor`
-    * **Laplace** : `laplace`
-    * **Numeriek int** : `num_integrate` / `nint`
-    * **Gradient** : `gradient` / `vector_gradient`
-    * **Matrix analyse** : `matrix`
-    * **Epische som** : `epische_som`
+    #### 📐 1. WISKUNDE & CALCULUS
+    * `taylor(sin(x))` — Taylor-reeks
+    * `laplace(exp(-t))` — Laplace-transformatie
+    * `num_integrate('exp(-x**2)', 0, 5)` — Numeriek integreren
+    * `diff(x^3 * sin(x), x)` — Afgeleide
+    * `matrix([[2, 1], [1, 3]])` — Matrix analyse
 
-    #### 🔢 2. ALGEBRA & VERGELIJKINGEN
-    * **Vergelijking** : `x^2 - 8x + 15 = 0`
-    * **Uitwerken/Haakjes** : `expand((x + 3)^4)`
-
-    #### 🧪 3. SCHEIKUNDE & LAB
-    * **Molaire massa** : `molmassa("C8H9NO2")`
-    * **Balanceren** : `balanceer`
-    * **Zuurgraad** : `ph`
-    * **Verdunningen** : `verdun(C1, 50, 0.1, 250)`
-    * **Algemene gaswet** : `gaswet(101325, "V", 1, 273.15, "V")`
-    * **Lab opbrengst** : `kook(24.5, 25.0)`
-
-    #### ⚛️ 4. NATUURKUNDE & KWANTUM
-    * **De Broglie** : `debroglie`, `debroglie_relativistisch`, `debroglie_thermisch`
-    * **Rydberg** : `rydberg`
-    * **Warmte** : `warmte`
-    * **Kwantum energie** : `kwantum`
-    * **Resonantie** : `resonantie`
-    * **Van der Pol** : `vanderpol`
-    * **ODE plot** : `ode_plot`
-    * **Wet van Ohm** : `ohm`
-
-    #### 🌌 5. ASTROFYSICA & RELATIVITEIT
-    * **Relativiteit** : `relativiteit`
-    * **Christoffel** : `christoffel`
-    * **Zwaartekracht** : `zwaartekracht`
-    * **Planeet info** : `planeet_info("jupiter")`
-    * **Baansimulatie** : `baan` / `wizard`
-    * **Impact simulatie** : `impact`
-    * **Schuine worp** : `worp`
-
-    #### 🎲 6. LOTERIJ & DATA-ANALYSES
-    * **Loterij simulatie** : `loterij`
-    * **Historie analyse** : `loterij_analyse`
-    * **Echte data** : `echte_loterij` / `laad_loterij`
-    * **Live data** : `live_loterij`
-
-    #### 🚀 7. SYSTEEM & TOOLS
-    * **Grand Tour** : `grand_tour`
-    * **Niet-lineaire ODE** : `numeriek()`
+    #### 🧪 2. SCHEIKUNDE & LAB
+    * `molmassa("C8H9NO2")` — Molaire massa Paracetamol
+    * `balanceer("H2 + O2 -> H2O")` — Reactie balanceren
+    * `ph(0.01)` — pH berekenen
     
-    *Typ 'menu' of 'help' in het invoerveld om dit overzicht op te vragen.*
+    #### ⚛️ 3. NATUURKUNDE & OVERIG
+    * `ohm(u=12, r=4)` — Wet van Ohm
+    * `planeet_info("jupiter")` — Planeet gegevens
+    * `grand_tour()` — Volledige systeemtest
+    
+    *Typ 'menu' of 'help' in het invoerveld voor dit overzicht.*
     """)
-
-def toon_handleiding():
-    toon_help()
 
 if st.button("Lanceer Berekening 🚀", type="primary"):
     if not gebruiker_input.strip():
@@ -178,11 +130,10 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
         else:
             with st.spinner("Boordcomputer voert berekening uit..."):
                 try:
-                    # Robuuste Namespace met veilige fallbacks
                     def veilige_functie(func_naam):
                         f = getattr(kids_rekenen, func_naam, None)
                         if f is None:
-                            return lambda *args, **kwargs: f"Fout: Functie '{func_naam}' is niet gevonden in kids_rekenen."
+                            return lambda *args, **kwargs: f"Fout: Functie '{func_naam}' ontbreekt in kids_rekenen."
                         return f
 
                     ns = {
@@ -192,15 +143,12 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                         "dsolve": sp.dsolve, "Eq": sp.Eq, "sqrt": sp.sqrt, "pi": sp.pi,
                         "Matrix": sp.Matrix, "factorial": sp.factorial, "zeta": sp.zeta,
                         
-                        # Scheikunde & Lab
                         "molmassa": veilige_functie("bereken_molmassa"),
                         "balanceer": veilige_functie("balanceer_reactie"),
                         "ph": veilige_functie("bereken_ph"),
                         "verdun": veilige_functie("verdun"),
                         "gaswet": veilige_functie("gaswet"),
                         "kook": veilige_functie("kook"),
-                        
-                        # Calculus & Wiskunde
                         "taylor": veilige_functie("bereken_taylor"),
                         "laplace": veilige_functie("laplace"),
                         "num_integrate": veilige_functie("num_integrate"),
@@ -209,8 +157,6 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                         "vector_gradient": veilige_functie("vector_gradient"),
                         "matrix": veilige_functie("matrix_analyse"),
                         "epische_som": veilige_functie("epische_wiskunde_som"),
-                        
-                        # Natuurkunde & Kwantum
                         "debroglie": veilige_functie("bereken_debroglie"),
                         "debroglie_relativistisch": veilige_functie("debroglie_relativistisch"),
                         "debroglie_thermisch": veilige_functie("debroglie_thermisch"),
@@ -221,8 +167,6 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                         "vanderpol": veilige_functie("vanderpol_simulatie"),
                         "ode_plot": veilige_functie("ode_plot"),
                         "ohm": veilige_functie("bereken_ohm"),
-                        
-                        # Astrofysica & Ruimte
                         "relativiteit": veilige_functie("bereken_relativiteit"),
                         "christoffel": veilige_functie("bereken_christoffel"),
                         "zwaartekracht": veilige_functie("zwaartekracht_kracht"),
@@ -231,15 +175,11 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                         "wizard": veilige_functie("baan_wizard"),
                         "impact": veilige_functie("simuleer_impact"),
                         "worp": veilige_functie("schuine_worp"),
-                        
-                        # Loterij & Data
                         "loterij": veilige_functie("bereken_loterij"),
                         "loterij_analyse": veilige_functie("analyseer_loterij_historie"),
                         "echte_loterij": veilige_functie("download_en_analyseer_echte_data"),
                         "live_loterij": veilige_functie("haal_live_loterij_data"),
                         "laad_loterij": veilige_functie("laad_en_analyseer_csv"),
-                        
-                        # Systeem & Numeriek
                         "grand_tour": veilige_functie("grand_tour"),
                         "numeriek": veilige_functie("los_op_numeriek"),
                     }
@@ -249,7 +189,6 @@ if st.button("Lanceer Berekening 🚀", type="primary"):
                     except Exception:
                         geparst = gebruiker_input
                     
-                    # Vang prints op
                     old_stdout = sys.stdout
                     new_stdout = io.StringIO()
                     sys.stdout = new_stdout
